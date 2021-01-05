@@ -1,3 +1,5 @@
 .idea/
 config.json
 __pycache__/
+*.db
+*.env
