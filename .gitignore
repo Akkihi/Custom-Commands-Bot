@@ -1,0 +1,9 @@
+.idea/
+config.json
+__pycache__/
+videos/
+photos/
+music/
+animation/
+stickers/
+media/
