@@ -16,7 +16,7 @@ async def add_command(message: Message):
         await message.answer('Триггер после комманды не указан')
         return
 
-    text = target_message.text
+    text = target_message.text or target_message.caption or None
 
     is_reply = message.get_command()[1:] == 'addr'
 
