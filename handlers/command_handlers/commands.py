@@ -21,9 +21,23 @@ async def add_command(message: Message):
     is_reply = message.get_command()[1:] == 'addr'
 
     media = None
-    if target_message.photo or target_message.document or target_message.audio:
+    if target_message.photo \
+            or target_message.document \
+            or target_message.audio \
+            or target_message.voice \
+            or target_message.video \
+            or target_message.video_note \
+            or target_message.animation \
+            or target_message.sticker:
         media_message = await save_message_to_storage_channel(message.reply_to_message)
-        media = media_message.audio or media_message.document or media_message.photo
+        media = media_message.audio \
+                or media_message.voice \
+                or media_message.document \
+                or media_message.photo \
+                or media_message.video \
+                or media_message.video_note \
+                or media_message.animation \
+                or media_message.sticker
 
     is_command_inline = False
     if message.chat.type == ChatType.PRIVATE:

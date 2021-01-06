@@ -44,7 +44,12 @@ def save_command(trigger,
                  text=None,
                  media: Union[aiogram.types.Document,
                               List[aiogram.types.PhotoSize],
-                              aiogram.types.Audio] = None,
+                              aiogram.types.Audio,
+                              aiogram.types.Voice,
+                              aiogram.types.Sticker,
+                              aiogram.types.Video,
+                              aiogram.types.VideoNote,
+                              aiogram.types.Animation] = None,
                  is_inline=False,
                  is_reply=False):
     db_user, created = save_user(created_by)
