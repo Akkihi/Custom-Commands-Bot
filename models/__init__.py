@@ -58,5 +58,15 @@ def save_command(text,
                                                 text=text,
                                                 is_inline=is_inline,
                                                 is_reply=is_reply)
+    db_command.media_file_id = media.file_id
+
+    if isinstance(media, aiogram.types.Document):
+        db_command.media_type = 'document'
+    if isinstance(media, aiogram.types.PhotoSize):
+        db_command.media_type = 'photo'
+    if isinstance(media, aiogram.types.Audio):
+        db_command.media_type = 'audio'
+
+    db_command.save()
 
     return db_command, created

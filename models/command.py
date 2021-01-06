@@ -9,6 +9,7 @@ class Command(BaseModel):
     created_by = ForeignKeyField(User, backref='commands', on_delete='CASCADE')
     to_chat = ForeignKeyField(Chat, backref='commands', on_delete='CASCADE')
     text = TextField(null=True)
-    media_msg_id = BigIntegerField(null=True)
+    media_file_id = BigIntegerField(null=True)
+    media_type = TextField(null=True)
     is_inline = BooleanField(default=False)
     is_reply = BooleanField(default=False)
