@@ -38,7 +38,8 @@ def save_chat(chat: aiogram.types.Chat):
     return db_chat, created
 
 
-def save_command(text,
+def save_command(trigger,
+                 text,
                  media: Union[aiogram.types.Document,
                               aiogram.types.PhotoSize,
                               aiogram.types.Audio],
@@ -55,9 +56,10 @@ def save_command(text,
 
     db_command, created = Command.get_or_create(created_by=db_user,
                                                 to_chat=db_chat,
-                                                text=text,
+                                                trigger=trigger,
                                                 is_inline=is_inline,
                                                 is_reply=is_reply)
+    db_command.text = text
     db_command.media_file_id = media.file_id
 
     if isinstance(media, aiogram.types.Document):
