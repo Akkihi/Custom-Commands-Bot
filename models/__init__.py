@@ -71,6 +71,16 @@ def save_command(trigger,
             media = media[-1]
         if isinstance(media, aiogram.types.Audio):
             db_command.media_type = 'audio'
+        if isinstance(media, aiogram.types.Voice):
+            db_command.media_type = 'voice'
+        if isinstance(media, aiogram.types.Video):
+            db_command.media_type = 'video'
+        if isinstance(media, aiogram.types.VideoNote):
+            db_command.media_type = 'video_note'
+        if isinstance(media, aiogram.types.Animation):
+            db_command.media_type = 'animation'
+        if isinstance(media, aiogram.types.Sticker):
+            db_command.media_type = 'sticker'
 
         db_command.media_file_id = media.file_id
 
