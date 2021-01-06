@@ -1,12 +1,14 @@
+import os
+
 from aiogram import Bot, Dispatcher
 from aiogram.utils.executor import Executor
 
 import config
-from services.vk import vk
 
 config.load_config()
 
-bot = Bot(token=config.TOKEN)
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher(bot)
 
 runner = Executor(dp, skip_updates=False)
