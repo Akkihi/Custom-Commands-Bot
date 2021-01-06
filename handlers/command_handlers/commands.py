@@ -1,7 +1,6 @@
 import models
-from aiogram.types import Message, ChatType, Chat, Update
+from aiogram.types import Message, ChatType
 from auth import dp
-import config
 from utils.general import save_message_to_storage_channel
 
 
@@ -19,14 +18,12 @@ async def add_command(message: Message):
 
     text = target_message.text
 
-    print(message.get_command()[1:])
     is_reply = message.get_command()[1:] == 'addr'
 
     media = None
     if target_message.photo or target_message.document or target_message.audio:
         media_message = await save_message_to_storage_channel(message.reply_to_message)
         media = media_message.audio or media_message.document or media_message.photo
-
 
     is_command_inline = False
     if message.chat.type == ChatType.PRIVATE:
