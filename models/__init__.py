@@ -91,8 +91,8 @@ def save_command(trigger,
 def delete_command(trigger,
                    created_by: aiogram.types.User,
                    to_chat: aiogram.types.Chat):
-    db_user = save_user(created_by)
-    db_chat = save_chat(to_chat)
-    Command.get(Command.created_by == db_user
-                and Command.to_chat == db_chat
-                and Command.trigger == trigger).delete_instance()
+    db_user, created = save_user(created_by)
+    db_chat, created = save_chat(to_chat)
+    Command.get((Command.created_by == db_user)
+                & (Command.to_chat == db_chat)
+                & (Command.trigger == trigger)).delete_instance()
