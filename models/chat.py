@@ -7,4 +7,4 @@ class Chat(BaseModel):
     telegram_id = BigIntegerField(unique=True)
     title = TextField(null=True)
     link = TextField(null=True)
-    premium_to = DateTimeField()
+    premium_to = DateTimeField(null=True)
