@@ -1,8 +1,10 @@
 from aiogram.types import Message, ParseMode
 from auth import dp
+from utils import logger
 
 
 @dp.message_handler(commands=['start', 'help'])
+@logger.log_msg
 async def start(message: Message):
     await message.answer(text="Привет! icmdbot - это бот для твоих кастомных команд под рукой!"
                          "\n**Доступные команды:**"

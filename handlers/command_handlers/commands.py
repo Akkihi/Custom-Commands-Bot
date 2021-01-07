@@ -2,12 +2,14 @@ import models
 from aiogram.types import Message, ChatType
 from auth import dp
 from utils.general import save_message_to_storage_channel
+from utils import logger
 
 
 @dp.message_handler(commands=['add', 'addr'], chat_type=[ChatType.PRIVATE,
                                                          ChatType.GROUP,
                                                          ChatType.SUPERGROUP,
                                                          ChatType.CHANNEL])
+@logger.log_msg
 async def add_command(message: Message):
     target_message = message.reply_to_message
     if not target_message:
@@ -61,6 +63,7 @@ async def add_command(message: Message):
                                                ChatType.GROUP,
                                                ChatType.SUPERGROUP,
                                                ChatType.CHANNEL])
+@logger.log_msg
 async def delete_command(message: Message):
     trigger = message.get_args()
     if not trigger:
