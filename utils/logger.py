@@ -5,7 +5,7 @@ from loguru import logger
 
 from utils.general import get_full_name
 
-logger.add('logs.log')
+logger.add('logs.log', encoding="utf8")
 
 
 def log_msg(func):
