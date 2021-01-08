@@ -34,9 +34,9 @@ async def on_trigger(message: Message):
         pass
 
     if command.text:
-        caption = get_full_name_link(message.from_user) + ' ' + command.text
+        caption = command.text
         if command.is_reply:
-            caption += ' ' + get_full_name_link(message.reply_to_message.from_user)
+            caption = get_full_name_link(message.from_user) + ' ' + command.text + ' ' + get_full_name_link(message.reply_to_message.from_user)
     else:
         caption = None
 
@@ -77,7 +77,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
         return
 
     db_target_user = None
-    if '@' in trigger:
+    if '@' in trigger:  # todo сделать проверку при сохранении на наличие собачки
         target_username = None
         parts = trigger.split()
         parts.reverse()
@@ -104,11 +104,11 @@ async def on_inline_trigger(inline_query: InlineQuery):
         return
 
     if command.text:
-        if db_target_user:
+        if db_target_user and command.is_reply:
             caption = get_full_name_link(inline_query.from_user) + ' ' + command.text + ' ' + get_full_name_link(
                 db_target_user)
         else:
-            caption = get_full_name_link(inline_query.from_user) + ' ' + command.text
+            caption = command.text
     else:
         caption = None
 
