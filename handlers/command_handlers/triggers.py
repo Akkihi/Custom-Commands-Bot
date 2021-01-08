@@ -74,7 +74,15 @@ async def on_inline_trigger(inline_query: InlineQuery):
     try:
         db_chat = Chat.get(Chat.telegram_id == db_user.telegram_id)
     except Exception as e:
-        print(e)
+        item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
+                                        input_message_content=InputTextMessageContent(
+                                            'Вы можете доабаить комманды в бота @icmd_bot',
+                                            parse_mode=ParseMode.HTML))
+        try:
+            await inline_query.bot.answer_inline_query(inline_query.id, results=[item], cache_time=1)
+        except Exception as e:
+            print(e)
+            return
         return
 
     db_target_user = None
