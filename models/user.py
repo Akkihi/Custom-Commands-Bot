@@ -8,4 +8,3 @@ class User(BaseModel):
     first_name = TextField(null=True)
     last_name = TextField(null=True)
     username = TextField(null=True)
-    premium_to = DateTimeField(null=True)
