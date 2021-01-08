@@ -86,7 +86,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
         return
 
     db_target_user = None
-    if '@' in trigger:  # todo сделать проверку при сохранении на наличие собачки
+    if '@' in trigger:
         target_username = None
         parts = trigger.split()
         parts.reverse()
@@ -116,12 +116,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
         if len(commands) > 0:
             for command in commands:
                 if command.text:
-                    if db_target_user and command.is_reply:
-                        caption = get_full_name_link(
-                            inline_query.from_user) + ' ' + command.text + ' ' + get_full_name_link(
-                            db_target_user)
-                    else:
-                        caption = command.text
+                    caption = command.text
                 else:
                     caption = None
                 item_id = str(len(items))
