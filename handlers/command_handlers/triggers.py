@@ -36,7 +36,8 @@ async def on_trigger(message: Message):
     if command.text:
         caption = command.text
         if command.is_reply:
-            caption = get_full_name_link(message.from_user) + ' ' + command.text + ' ' + get_full_name_link(message.reply_to_message.from_user)
+            caption = get_full_name_link(message.from_user) + ' ' + command.text + ' ' + get_full_name_link(
+                message.reply_to_message.from_user)
     else:
         caption = None
 
@@ -100,7 +101,62 @@ async def on_inline_trigger(inline_query: InlineQuery):
                               & (Command.is_inline == True)
                               & (Command.trigger == trigger))
     except Exception as e:
-        print(e)
+        commands = Command.select().where((Command.created_by == db_user)
+                                          & (Command.to_chat == db_chat)
+                                          & (Command.is_inline == True))
+        items = []
+        if len(commands) > 0:
+            for command in commands:
+                if command.text:
+                    if db_target_user and command.is_reply:
+                        caption = get_full_name_link(
+                            inline_query.from_user) + ' ' + command.text + ' ' + get_full_name_link(
+                            db_target_user)
+                    else:
+                        caption = command.text
+                else:
+                    caption = None
+                item_id = str(len(items))
+                if command.media_type == 'photo':
+                    item = InlineQueryResultPhoto(id=item_id, photo_url=command.media_file_id,
+                                                  thumb_url=command.media_file_id,
+                                                  caption=caption, parse_mode=ParseMode.HTML, title=command.trigger)
+                elif command.media_type == 'document' or command.media_type == 'audio':
+                    item = InlineQueryResultDocument(id=item_id, document_url=command.media_file_id,
+                                                     thumb_url=command.media_file_id,
+                                                     title=command.trigger, mime_type='application/zip',
+                                                     caption=caption,
+                                                     parse_mode=ParseMode.HTML)
+                elif command.media_type == 'animation':
+                    item = InlineQueryResultGif(id=item_id, gif_url=command.media_file_id,
+                                                thumb_url=command.media_file_id, title=command.trigger,
+                                                caption=caption, parse_mode=ParseMode.HTML)
+                elif command.media_type == 'voice':
+                    item = InlineQueryResultVoice(id=item_id, voice_url=command.media_file_id, caption=caption,
+                                                  title=command.trigger,
+                                                  parse_mode=ParseMode.HTML)
+                elif command.media_type == 'video':
+                    item = InlineQueryResultVideo(id=item_id, video_url=command.media_file_id,
+                                                  thumb_url=command.media_file_id,
+                                                  caption=caption, title=command.trigger, mime_type='video/mp4',
+                                                  parse_mode=ParseMode.HTML)
+                else:
+                    item = InlineQueryResultArticle(id=item_id, title=command.trigger,
+                                                    input_message_content=InputTextMessageContent(caption,
+                                                                                                  parse_mode=ParseMode.HTML))
+                items.append(item)
+
+        else:
+            item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
+                                            input_message_content=InputTextMessageContent(
+                                                'Вы можете доабаить комманды в бота @icmd_bot',
+                                                parse_mode=ParseMode.HTML))
+            items.append(item)
+        try:
+            await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
+        except Exception as e:
+            print(e)
+            return
         return
 
     if command.text:
