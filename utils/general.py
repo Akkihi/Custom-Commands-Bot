@@ -1,10 +1,21 @@
+import re
+
 from aiogram.types import User, Message
+from aiogram.utils.markdown import link
 
 import config
 
 
-def get_full_name(user: User):
+def get_full_name(user):
     return (user.first_name or '') + ' ' + (user.last_name or '')
+
+
+def get_full_name_link(user):
+    if hasattr(user, 'telegram_id'):
+        user_id = user.telegram_id
+    else:
+        user_id = user.id
+    return '<a href=\"tg://user?id=' + str(user_id) + '\">' + get_full_name(user) + '</a>'
 
 
 async def save_message_to_storage_channel(target_message: Message) -> Message:

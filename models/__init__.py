@@ -62,6 +62,8 @@ def save_command(trigger,
 
     if text:
         db_command.text = text
+    else:
+        db_command.text = None
 
     if media:
         if isinstance(media, aiogram.types.Document):

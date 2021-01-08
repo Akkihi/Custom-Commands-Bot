@@ -25,7 +25,14 @@ async def add_command(message: Message):
 
     is_reply = message.get_command()[1:] == 'addr'
 
+    is_command_inline = False
+    if message.chat.type == ChatType.PRIVATE:
+        if message.sticker or message.video_note:
+            await message.answer('Данный тип медиа не поддерживается')
+            return
+        is_command_inline = True
     media = None
+
     if target_message.photo \
             or target_message.document \
             or target_message.audio \
@@ -44,9 +51,6 @@ async def add_command(message: Message):
                 or media_message.animation \
                 or media_message.sticker
 
-    is_command_inline = False
-    if message.chat.type == ChatType.PRIVATE:
-        is_command_inline = True
 
     models.save_command(trigger=trigger,
                         text=text,
