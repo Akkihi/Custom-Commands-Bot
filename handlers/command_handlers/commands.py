@@ -27,6 +27,8 @@ async def add_command(message: Message):
 
     is_command_inline = False
     if message.chat.type == ChatType.PRIVATE:
+        if '@' in trigger:
+            await message.answer('Нельзя сохранять симовол @ в комманду')
         if message.sticker or message.video_note:
             await message.answer('Данный тип медиа не поддерживается')
             return
