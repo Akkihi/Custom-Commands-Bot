@@ -57,8 +57,9 @@ def save_command(trigger,
     db_command, created = Command.get_or_create(created_by=db_user,
                                                 to_chat=db_chat,
                                                 trigger=trigger,
-                                                is_inline=is_inline,
-                                                is_reply=is_reply)
+                                                is_inline=is_inline)
+    db_command.is_reply = is_reply
+
     if text:
         db_command.text = text
 
@@ -82,6 +83,9 @@ def save_command(trigger,
             db_command.media_type = 'sticker'
 
         db_command.media_file_id = media.file_id
+
+    else:
+        db_command.media_type = 'no_media'
 
     db_command.save()
 

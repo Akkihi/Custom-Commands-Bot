@@ -1,1 +1,1 @@
-from .command_handlers import start, commands
+from .command_handlers import start, commands, triggers

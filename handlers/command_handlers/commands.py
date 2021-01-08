@@ -66,6 +66,7 @@ async def add_command(message: Message):
 @logger.log_msg
 async def delete_command(message: Message):
     trigger = message.get_args()
+    print(trigger)
     if not trigger:
         await message.answer('Триггер после комманды не указан')
         return
