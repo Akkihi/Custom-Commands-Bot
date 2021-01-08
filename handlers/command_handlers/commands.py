@@ -73,6 +73,18 @@ async def delete_command(message: Message):
     await message.reply(text='Команда удалена.')
 
 
+@dp.message_handler(commands='mycom', chat_type=[ChatType.PRIVATE,
+                                                 ChatType.GROUP,
+                                                 ChatType.SUPERGROUP,
+                                                 ChatType.CHANNEL])
+async def my_commands(message: Message):
+    result = models.get_mycommands(created_by=message.from_user)
+    mycom = ''
+    for command in result:
+        mycom += '/' + command.trigger + ' '
+    await message.answer(text='Вот список твоих команд:\n' + str(mycom))
+
+
 @dp.message_handler(commands='get_id', chat_type=ChatType.GROUP)
 async def get_id(message: Message):
     await message.answer(text=message.chat.id)

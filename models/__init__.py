@@ -95,4 +95,12 @@ def delete_command(trigger,
     db_chat, created = save_chat(to_chat)
     Command.get((Command.created_by == db_user)
                 & (Command.to_chat == db_chat)
-                & (Command.trigger == trigger)).delete_instance()
+               & (Command.trigger == trigger)).delete_instance()
+
+
+def get_mycommands(created_by: aiogram.types.User):
+    db_user, created = save_user(created_by)
+    query = Command.select().where(Command.created_by == db_user)
+    result = list(query)
+    result = [t for t in query]
+    return result
