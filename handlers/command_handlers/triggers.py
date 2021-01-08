@@ -82,9 +82,9 @@ async def on_inline_trigger(inline_query: InlineQuery):
         parts = trigger.split()
         parts.reverse()
         for part in parts:
-            if len(part) < 6:
-                return  # todo вывод ошибки
             if part.startswith('@'):
+                if len(part) < 6:
+                    continue
                 target_username = part[1:]
                 trigger = trigger.replace(' ' + part, '')
                 break
