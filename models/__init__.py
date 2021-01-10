@@ -8,6 +8,9 @@ from .base_model import BaseModel, DATABASE
 from .user import User
 from .chat import Chat
 from .command import Command
+from .tarif_type import TarifType
+from .user_tarif import UserTarif
+from .chat_tarif import ChatTarif
 
 if not os.path.exists(DATABASE):  # проверка на существование файла бд и создание ее
     db = SqliteDatabase(DATABASE)
@@ -15,6 +18,9 @@ if not os.path.exists(DATABASE):  # проверка на существован
         User,
         Chat,
         Command,
+        TarifType,
+        UserTarif,
+        ChatTarif,
     ])
 
 
