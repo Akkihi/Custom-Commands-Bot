@@ -1,7 +1,10 @@
+from typing import List
+
 from aiogram.dispatcher.handler import SkipHandler
 from aiogram.types import Message, InlineQuery, InlineQueryResultArticle, InlineQueryResultPhoto, \
     InlineQueryResultDocument, \
-    InlineQueryResultVideo, InlineQueryResultVoice, InlineQueryResultGif, InputTextMessageContent, ParseMode
+    InlineQueryResultVideo, InlineQueryResultVoice, InlineQueryResultGif, InputTextMessageContent, ParseMode, \
+    InlineQueryResult
 
 from auth import dp
 from models import save_chat, save_user, Command, Chat, User
@@ -73,18 +76,16 @@ async def on_inline_trigger(inline_query: InlineQuery):
     db_user, created = save_user(inline_query.from_user)
     try:
         db_chat = Chat.get(Chat.telegram_id == db_user.telegram_id)
-    except Exception as e:
-        item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
-                                        input_message_content=InputTextMessageContent(
+    except Exception as e:  # если юзер который вызывает комманду не найден
+        items = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
+                                         input_message_content=InputTextMessageContent(
                                             'Вы можете доабаить комманды в бота @icmd_bot',
                                             parse_mode=ParseMode.HTML))
-        try:
-            await inline_query.bot.answer_inline_query(inline_query.id, results=[item], cache_time=1)
-        except Exception as e:
-            print(e)
-            return
+
+        await inline_query.bot.answer_inline_query(inline_query.id, results=[items], cache_time=1)
         return
 
+    # проверяем если в запросе есть собачка значит там юзернейм пользователя и пытаемся его найти
     db_target_user = None
     if '@' in trigger:
         target_username = None
@@ -95,12 +96,11 @@ async def on_inline_trigger(inline_query: InlineQuery):
                 if len(part) < 6:
                     continue
                 target_username = part[1:]
-                trigger = trigger.replace(' ' + part, '')
+                trigger = trigger.replace(' ' + part, '') # вырезаем юзернейм из комманды чтобы потом искать ее в базе
                 break
         try:
             db_target_user = User.get(User.username == target_username)
-        except Exception as e:
-            print(e)
+        except Exception as e:  # если юзер которого указали в запросе не найден то не делаем ничего и не отправляем комманду
             return  # todo вывод ошибки
 
     try:
@@ -108,91 +108,72 @@ async def on_inline_trigger(inline_query: InlineQuery):
                               & (Command.to_chat == db_chat)
                               & (Command.is_inline == True)
                               & (Command.trigger == trigger))
-    except Exception as e:
+    except Exception as e:  # если комманда не найдена то выводим весь список комманд
         commands = Command.select().where((Command.created_by == db_user)
                                           & (Command.to_chat == db_chat)
                                           & (Command.is_inline == True))
-        items = []
-        if len(commands) > 0:
-            for command in commands:
-                if command.text:
+        items = get_inline_query_result(commands)
+
+        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
+        return
+
+    items = get_inline_query_result([command], db_target_user)
+
+    await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
+
+
+def get_inline_query_result(commands: List[Command], target_user: User = None) -> List[InlineQueryResult]:
+    items = []
+    if len(commands) > 0:
+        for command in commands:
+
+            if command.text:
+                if target_user and command.is_reply:
+                    caption = get_full_name_link(command.created_by) + ' ' + command.text + ' ' + get_full_name_link(
+                        target_user)
+                elif command.is_reply:
+                    caption = get_full_name_link(command.created_by) + ' ' + command.text
+                else:
                     caption = command.text
-                else:
-                    caption = None
-                item_id = str(len(items))
-                if command.media_type == 'photo':
-                    item = InlineQueryResultPhoto(id=item_id, photo_url=command.media_file_id,
-                                                  thumb_url=command.media_file_id,
-                                                  caption=caption, parse_mode=ParseMode.HTML, title=command.trigger)
-                elif command.media_type == 'document' or command.media_type == 'audio':
-                    item = InlineQueryResultDocument(id=item_id, document_url=command.media_file_id,
-                                                     thumb_url=command.media_file_id,
-                                                     title=command.trigger, mime_type='application/zip',
-                                                     caption=caption,
-                                                     parse_mode=ParseMode.HTML)
-                elif command.media_type == 'animation':
-                    item = InlineQueryResultGif(id=item_id, gif_url=command.media_file_id,
-                                                thumb_url=command.media_file_id, title=command.trigger,
-                                                caption=caption, parse_mode=ParseMode.HTML)
-                elif command.media_type == 'voice':
-                    item = InlineQueryResultVoice(id=item_id, voice_url=command.media_file_id, caption=caption,
-                                                  title=command.trigger,
-                                                  parse_mode=ParseMode.HTML)
-                elif command.media_type == 'video':
-                    item = InlineQueryResultVideo(id=item_id, video_url=command.media_file_id,
-                                                  thumb_url=command.media_file_id,
-                                                  caption=caption, title=command.trigger, mime_type='video/mp4',
-                                                  parse_mode=ParseMode.HTML)
-                else:
-                    item = InlineQueryResultArticle(id=item_id, title=command.trigger,
-                                                    input_message_content=InputTextMessageContent(caption,
-                                                                                                  parse_mode=ParseMode.HTML))
-                items.append(item)
+            else:
+                caption = None
 
-        else:
-            item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
-                                            input_message_content=InputTextMessageContent(
-                                                'Вы можете доабаить комманды в бота @icmd_bot',
-                                                parse_mode=ParseMode.HTML))
+            item_id = str(len(items)) # айдишник текущего варианта будет равен длине массива уже созданных варикантов
+
+            if command.media_type == 'photo':
+                item = InlineQueryResultPhoto(id=item_id, photo_url=command.media_file_id,
+                                              thumb_url=command.media_file_id,
+                                              caption=caption, parse_mode=ParseMode.HTML, title=command.trigger)
+            elif command.media_type == 'document' or command.media_type == 'audio':
+                item = InlineQueryResultDocument(id=item_id, document_url=command.media_file_id,
+                                                 thumb_url=command.media_file_id,
+                                                 title=command.trigger, mime_type='application/zip',
+                                                 caption=caption,
+                                                 parse_mode=ParseMode.HTML)
+            elif command.media_type == 'animation':
+                item = InlineQueryResultGif(id=item_id, gif_url=command.media_file_id,
+                                            thumb_url=command.media_file_id, title=command.trigger,
+                                            caption=caption, parse_mode=ParseMode.HTML)
+            elif command.media_type == 'voice':
+                item = InlineQueryResultVoice(id=item_id, voice_url=command.media_file_id, caption=caption,
+                                              title=command.trigger,
+                                              parse_mode=ParseMode.HTML)
+            elif command.media_type == 'video':
+                item = InlineQueryResultVideo(id=item_id, video_url=command.media_file_id,
+                                              thumb_url=command.media_file_id,
+                                              caption=caption, title=command.trigger, mime_type='video/mp4',
+                                              parse_mode=ParseMode.HTML)
+            else:
+                item = InlineQueryResultArticle(id=item_id, title=command.trigger,
+                                                input_message_content=InputTextMessageContent(caption,
+                                                                                              parse_mode=ParseMode.HTML))
             items.append(item)
-        try:
-            await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
-        except Exception as e:
-            print(e)
-            return
-        return
 
-    if command.text:
-        if db_target_user and command.is_reply:
-            caption = get_full_name_link(inline_query.from_user) + ' ' + command.text + ' ' + get_full_name_link(
-                db_target_user)
-        else:
-            caption = command.text
-    else:
-        caption = None
+    else:   # если комманд нету то выводим приглашение
+        item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
+                                        input_message_content=InputTextMessageContent(
+                                            'Вы можете доабаить комманды в бота @icmd_bot',
+                                            parse_mode=ParseMode.HTML))
+        items.append(item)
 
-    if command.media_type == 'photo':
-        item = InlineQueryResultPhoto(id='0', photo_url=command.media_file_id, thumb_url=command.media_file_id,
-                                      caption=caption, parse_mode=ParseMode.HTML)
-    elif command.media_type == 'document' or command.media_type == 'audio':
-        item = InlineQueryResultDocument(id='0', document_url=command.media_file_id, thumb_url=command.media_file_id,
-                                         title='document', mime_type='application/zip', caption=caption,
-                                         parse_mode=ParseMode.HTML)
-    elif command.media_type == 'animation':
-        item = InlineQueryResultGif(id='0', gif_url=command.media_file_id, thumb_url=command.media_file_id, title='gif',
-                                    caption=caption, parse_mode=ParseMode.HTML)
-    elif command.media_type == 'voice':
-        item = InlineQueryResultVoice(id='0', voice_url=command.media_file_id, caption=caption, title='voice',
-                                      parse_mode=ParseMode.HTML)
-    elif command.media_type == 'video':
-        item = InlineQueryResultVideo(id='0', video_url=command.media_file_id, thumb_url=command.media_file_id,
-                                      caption=caption, title='video', mime_type='video/mp4', parse_mode=ParseMode.HTML)
-    else:
-        item = InlineQueryResultArticle(id='0', title='текст', input_message_content=InputTextMessageContent(caption,
-                                                                                                             parse_mode=ParseMode.HTML))
-
-    try:
-        await inline_query.bot.answer_inline_query(inline_query.id, results=[item], cache_time=1)
-    except Exception as e:
-        print(e)
-        return
+    return items
