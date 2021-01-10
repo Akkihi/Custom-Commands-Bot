@@ -25,7 +25,7 @@ async def on_trigger(message: Message):
                               & (Command.trigger == trigger))
     except Exception as e:
         print(e)
-        raise SkipHandler
+        raise SkipHandler  # скипаем хендлер чтобы если это не триггер а комманда бота то она была обработана
 
     if command.is_reply and not message.reply_to_message:
         await message.answer('Комманда должна быть отправлена ответом на сообщение')
@@ -76,7 +76,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
     db_user, created = save_user(inline_query.from_user)
     try:
         db_chat = Chat.get(Chat.telegram_id == db_user.telegram_id)
-    except Exception as e:  # если юзер который вызывает комманду не найден
+    except Exception as e:  # если юзер который вызывает комманду не найден в базе
         items = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
                                          input_message_content=InputTextMessageContent(
                                             'Вы можете доабаить комманды в бота @icmd_bot',
@@ -90,7 +90,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
     if '@' in trigger:
         target_username = None
         parts = trigger.split()
-        parts.reverse()
+        parts.reverse()         # инвертируем массив для того чтобы брать последний указанный юзернейм
         for part in parts:
             if part.startswith('@'):
                 if len(part) < 6:
@@ -117,7 +117,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
         await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
         return
 
-    items = get_inline_query_result([command], db_target_user)
+    items = get_inline_query_result([command], db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
 
     await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
 

@@ -9,7 +9,7 @@ from .user import User
 from .chat import Chat
 from .command import Command
 
-if not os.path.exists(DATABASE):
+if not os.path.exists(DATABASE):  # проверка на существование файла бд и создание ее
     db = SqliteDatabase(DATABASE)
     db.create_tables([
         User,
@@ -18,7 +18,7 @@ if not os.path.exists(DATABASE):
     ])
 
 
-def save_user(user: aiogram.types.User):
+def save_user(user: aiogram.types.User): # функции возвращают 2 значения, это нужно учитывать при вызове
     db_user, created = User.get_or_create(telegram_id=user.id)
     db_user.first_name = user.first_name
     db_user.last_name = user.last_name
@@ -28,7 +28,7 @@ def save_user(user: aiogram.types.User):
     return db_user, created
 
 
-def save_chat(chat: aiogram.types.Chat):
+def save_chat(chat: aiogram.types.Chat): # функции возвращают 2 значения, это нужно учитывать при вызове
     db_chat, created = Chat.get_or_create(telegram_id=chat.id)
     db_chat.title = chat.title
     db_chat.link = chat.invite_link
@@ -37,7 +37,7 @@ def save_chat(chat: aiogram.types.Chat):
     return db_chat, created
 
 
-def save_command(trigger,
+def save_command(trigger,  # функции возвращают 2 значения, это нужно учитывать при вызове
                  created_by: aiogram.types.User,
                  to_chat: aiogram.types.Chat,
                  text=None,
@@ -101,12 +101,11 @@ def delete_command(trigger,
     db_chat, created = save_chat(to_chat)
     Command.get((Command.created_by == db_user)
                 & (Command.to_chat == db_chat)
-               & (Command.trigger == trigger)).delete_instance()
+                & (Command.trigger == trigger)).delete_instance()
 
 
 def get_mycommands(created_by: aiogram.types.User):
     db_user, created = save_user(created_by)
     query = Command.select().where(Command.created_by == db_user)
-    result = list(query)
     result = [t for t in query]
     return result

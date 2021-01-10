@@ -26,7 +26,8 @@ async def add_command(message: Message):
     is_reply = message.get_command()[1:] == 'addr'
 
     is_command_inline = False
-    if message.chat.type == ChatType.PRIVATE:
+
+    if message.chat.type == ChatType.PRIVATE: # проверяем ограничения для инлайн комманд
         if '@' in trigger:
             await message.answer('Нельзя сохранять симовол @ в комманду')
         if message.sticker or message.video_note:
