@@ -104,20 +104,16 @@ async def on_inline_trigger(inline_query: InlineQuery):
             return  # todo вывод ошибки
 
     try:
-        command = Command.get((Command.created_by == db_user)
-                              & (Command.to_chat == db_chat)
-                              & (Command.is_inline == True)
-                              & (Command.trigger == trigger))
+        commands = Command.select().where((Command.created_by == db_user)
+                                          & (Command.to_chat == db_chat)
+                                          & (Command.is_inline == True)
+                                          & (Command.trigger.startswith(trigger)))
     except Exception as e:  # если комманда не найдена то выводим весь список комманд
         commands = Command.select().where((Command.created_by == db_user)
                                           & (Command.to_chat == db_chat)
                                           & (Command.is_inline == True))
-        items = get_inline_query_result(commands)
 
-        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
-        return
-
-    items = get_inline_query_result([command], db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
+    items = get_inline_query_result(commands, db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
 
     await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
 
