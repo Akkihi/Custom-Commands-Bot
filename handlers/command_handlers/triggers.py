@@ -115,7 +115,12 @@ async def on_inline_trigger(inline_query: InlineQuery):
 
     items = get_inline_query_result(commands, db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
 
-    await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
+    if len(items) == 1:
+        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1,
+                                                   switch_pm_text='Перейти в бота', switch_pm_parameter='0')
+    else:
+        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
+
 
 
 def get_inline_query_result(commands: List[Command], target_user: User = None) -> List[InlineQueryResult]:
@@ -166,7 +171,7 @@ def get_inline_query_result(commands: List[Command], target_user: User = None) -
             items.append(item)
 
     else:   # если комманд нету то выводим приглашение
-        item = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
+        item = InlineQueryResultArticle(id='0', title='Комманд нету',
                                         input_message_content=InputTextMessageContent(
                                             'Вы можете доабаить комманды в бота @icmd_bot',
                                             parse_mode=ParseMode.HTML))
