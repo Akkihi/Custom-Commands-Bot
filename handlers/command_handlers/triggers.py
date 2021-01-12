@@ -115,12 +115,8 @@ async def on_inline_trigger(inline_query: InlineQuery):
 
     items = get_inline_query_result(commands, db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
 
-    if len(items) == 1:
-        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1,
-                                                   switch_pm_text='Перейти в бота', switch_pm_parameter='0')
-    else:
-        await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1)
-
+    await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1,
+                                               switch_pm_text='Перейти в бота', switch_pm_parameter='0')
 
 
 def get_inline_query_result(commands: List[Command], target_user: User = None) -> List[InlineQueryResult]:
