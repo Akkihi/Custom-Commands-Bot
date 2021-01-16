@@ -88,7 +88,7 @@ def save_command(trigger,  # функции возвращают 2 значен�
                 db_command.delete_instance()
                 raise Exception('Лимит превышен')
         else:
-            tarif = db_user.tarif[0]
+            tarif = db_chat.tarif[0]
             if (tarif.custom_limit and len(commands) > tarif.custom_limit) or \
                     (len(commands) > tarif.tarif_type.default_limit):
                 db_command.delete_instance()
