@@ -73,12 +73,14 @@ async def add_command(message: Message):
 @logger.log_msg
 async def delete_command(message: Message):
     trigger = message.get_args()
-    print(trigger)
     if not trigger:
         await message.answer('Триггер после комманды не указан')
         return
-    models.delete_command(trigger=trigger, to_chat=message.chat)
-    await message.reply(text='Команда удалена.')
+    try:
+        models.delete_command(trigger=trigger, to_chat=message.chat)
+        await message.reply(text='Команда удалена.')
+    except:
+        await message.reply(text='Такой комманды не существует')
 
 
 @dp.message_handler(commands='mycom', chat_type=ChatType.PRIVATE)
@@ -93,7 +95,7 @@ async def my_commands(message: Message):
 @dp.message_handler(commands='mycom', chat_type=[ChatType.CHANNEL,
                                                  ChatType.GROUP,
                                                  ChatType.SUPERGROUP])
-async def my_commands(message: Message):
+async def chat_commands(message: Message):
     result = models.get_chatcommands(to_chat=message.chat)
     mycom = ''
     for command in result:
