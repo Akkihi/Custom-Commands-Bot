@@ -77,7 +77,7 @@ async def delete_command(message: Message):
     if not trigger:
         await message.answer('Триггер после комманды не указан')
         return
-    models.delete_command(trigger=trigger, created_by=message.from_user, to_chat=message.chat)
+    models.delete_command(trigger=trigger, to_chat=message.chat)
     await message.reply(text='Команда удалена.')
 
 
