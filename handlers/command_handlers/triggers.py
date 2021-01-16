@@ -80,10 +80,12 @@ async def on_inline_trigger(inline_query: InlineQuery):
     except Exception as e:  # если юзер который вызывает комманду не найден в базе
         items = InlineQueryResultArticle(id='0', title='Вы можете добавить комманды',
                                          input_message_content=InputTextMessageContent(
-                                            'Вы можете доабаить комманды в бота @icmd_bot',
+                                            'Вы можете доабаить комманды в бота @icmdbot',
                                             parse_mode=ParseMode.HTML))
 
-        await inline_query.bot.answer_inline_query(inline_query.id, results=[items], cache_time=1)
+        await inline_query.bot.answer_inline_query(inline_query.id, results=[items], cache_time=1,
+                                                  switch_pm_text="Нажми, чтобы перейти в бота",
+                                                   switch_pm_parameter='start')
         return
 
     # проверяем если в запросе есть собачка значит там юзернейм пользователя и пытаемся его найти
