@@ -19,8 +19,7 @@ async def on_trigger(message: Message):
     chat_id = message.chat.id
 
     try:
-        command = Command.get((Command.created_by == db_user)
-                              & (Command.to_chat == db_chat)
+        command = Command.get((Command.to_chat == db_chat)
                               & (Command.is_inline == False)
                               & (Command.trigger == trigger))
     except Exception as e:
