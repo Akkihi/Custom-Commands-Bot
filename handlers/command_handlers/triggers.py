@@ -170,7 +170,7 @@ def get_inline_query_result(commands: List[Command], target_user: User = None) -
     else:   # если комманд нету то выводим приглашение
         item = InlineQueryResultArticle(id='0', title='Комманд нету',
                                         input_message_content=InputTextMessageContent(
-                                            'Вы можете доабаить комманды в бота @icmd_bot',
+                                            'Вы можете доабаить комманды в бота @icmdbot',
                                             parse_mode=ParseMode.HTML))
         items.append(item)
 
