@@ -88,7 +88,7 @@ def save_command(trigger,  # функции возвращают 2 значен�
 
         # если кастомный лимит не задан то чекаем дефолтный (условие сверху), или чекаем кастомный (условие снизу)
         if ((not tarif.custom_limit or tarif.custom_limit <= 0) and (len(commands) > tarif.tarif_type.default_limit)) or \
-                len(commands) > tarif.custom_limit:
+                (tarif.custom_limit and len(commands) > tarif.custom_limit):
             db_command.delete_instance()
             raise Exception('Лимит превышен')
 

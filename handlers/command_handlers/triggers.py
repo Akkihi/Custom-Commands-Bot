@@ -14,8 +14,7 @@ from utils.general import get_full_name_link
 @dp.message_handler(lambda msg: msg.is_command())
 async def on_trigger(message: Message):
     trigger = message.get_command(pure=True)
-    for part in message.text.split(' ')[1:]:
-        trigger += ' ' + part
+    target_user = message.get_args()
     db_user, created = save_user(message.from_user)
     db_chat, created = save_chat(message.chat)
     chat_id = message.chat.id
@@ -28,8 +27,8 @@ async def on_trigger(message: Message):
         print(e)
         raise SkipHandler  # скипаем хендлер чтобы если это не триггер а комманда бота то она была обработана
 
-    if command.is_reply and not message.reply_to_message:
-        await message.answer('Комманда должна быть отправлена ответом на сообщение')
+    if command.is_reply and not message.reply_to_message and len(target_user) == 0:
+        await message.answer('Комманда должна быть отправлена ответом на сообщение или иметь получателя')
         return
 
     try:
@@ -38,10 +37,13 @@ async def on_trigger(message: Message):
         pass
 
     if command.text:
-        caption = command.text
-        if command.is_reply:
+        if command.is_reply and message.reply_to_message:
             caption = get_full_name_link(message.from_user) + ' ' + command.text + ' ' + get_full_name_link(
                 message.reply_to_message.from_user)
+        elif command.is_reply:
+            caption = get_full_name_link(message.from_user) + ' ' + command.text + ' ' + target_user
+        else:
+            caption = command.text
     else:
         caption = None
 
@@ -73,7 +75,8 @@ async def on_trigger(message: Message):
 
 @dp.inline_handler()
 async def on_inline_trigger(inline_query: InlineQuery):
-    trigger = inline_query.query
+    trigger = inline_query.query.split(' ')[0]
+    target_raw_user = inline_query.query[len(trigger) + 1:]
     db_user, created = save_user(inline_query.from_user)
     try:
         db_chat = Chat.get(Chat.telegram_id == db_user.telegram_id)
@@ -84,7 +87,7 @@ async def on_inline_trigger(inline_query: InlineQuery):
                                             parse_mode=ParseMode.HTML))
 
         await inline_query.bot.answer_inline_query(inline_query.id, results=[items], cache_time=1,
-                                                  switch_pm_text="Нажми, чтобы перейти в бота",
+                                                   switch_pm_text="Нажми, чтобы перейти в бота",
                                                    switch_pm_parameter='start')
         return
 
@@ -116,13 +119,13 @@ async def on_inline_trigger(inline_query: InlineQuery):
                                           & (Command.to_chat == db_chat)
                                           & (Command.is_inline == True))
 
-    items = get_inline_query_result(commands, db_target_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
+    items = get_inline_query_result(commands, db_target_user, target_raw_user) # здесь одну комманду оборачиваем в массив потому что фунцкия принимает массивы
 
     await inline_query.bot.answer_inline_query(inline_query.id, results=items, cache_time=1,
                                                switch_pm_text='Перейти в бота', switch_pm_parameter='0')
 
 
-def get_inline_query_result(commands: List[Command], target_user: User = None) -> List[InlineQueryResult]:
+def get_inline_query_result(commands: List[Command], target_user: User = None, target_raw_user: str = None) -> List[InlineQueryResult]:
     items = []
     if len(commands) > 0:
         for command in commands:
@@ -131,6 +134,8 @@ def get_inline_query_result(commands: List[Command], target_user: User = None) -
                 if target_user and command.is_reply:
                     caption = get_full_name_link(command.created_by) + ' ' + command.text + ' ' + get_full_name_link(
                         target_user)
+                elif target_raw_user and len(target_raw_user) > 0 and command.is_reply:
+                    caption = get_full_name_link(command.created_by) + ' ' + command.text + ' ' + target_raw_user
                 elif command.is_reply:
                     caption = get_full_name_link(command.created_by) + ' ' + command.text
                 else:

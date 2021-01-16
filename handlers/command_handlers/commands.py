@@ -21,9 +21,12 @@ async def add_command(message: Message):
         await message.answer('Триггер после комманды не указан')
         return
 
-    text = target_message.text or target_message.caption or None
+    if len(trigger.split(' ')) > 1:
+        await message.answer('Триггер должен состоять из одного слова')
 
-    is_reply = message.get_command()[1:] == 'addr'
+    text = target_message.text or target_message.caption or none
+
+    is_reply = message.get_command(pure=True) == 'addr'
 
     is_command_inline = False
 
@@ -53,7 +56,6 @@ async def add_command(message: Message):
                 or media_message.video_note \
                 or media_message.animation \
                 or media_message.sticker
-
 
     models.save_command(trigger=trigger,
                         text=text,
