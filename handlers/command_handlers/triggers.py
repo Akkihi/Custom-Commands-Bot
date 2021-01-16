@@ -13,7 +13,9 @@ from utils.general import get_full_name_link
 
 @dp.message_handler(lambda msg: msg.is_command())
 async def on_trigger(message: Message):
-    trigger = message.get_command()[1:]
+    trigger = message.get_command(pure=True)
+    for part in message.text.split(' ')[1:]:
+        trigger += ' ' + part
     db_user, created = save_user(message.from_user)
     db_chat, created = save_chat(message.chat)
     chat_id = message.chat.id

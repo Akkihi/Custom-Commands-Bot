@@ -145,3 +145,11 @@ def get_mycommands(created_by: aiogram.types.User):
     query = Command.select().where(Command.created_by == db_user)
     result = [t for t in query]
     return result
+
+
+def get_chatcommands(to_chat: aiogram.types.Chat):
+    db_chat, created = save_chat(to_chat)
+    query = Command.select().where(Command.to_chat == db_chat)
+    result = [t for t in query]
+    return result
+
