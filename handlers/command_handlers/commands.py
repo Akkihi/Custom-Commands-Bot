@@ -24,19 +24,20 @@ async def add_command(message: Message):
     if len(trigger.split(' ')) > 1:
         await message.answer('Триггер должен состоять из одного слова')
 
-    text = target_message.text or target_message.caption or none
+    text = target_message.text or target_message.caption or None
 
     is_reply = message.get_command(pure=True) == 'addr'
 
     is_command_inline = False
 
     if message.chat.type == ChatType.PRIVATE: # проверяем ограничения для инлайн комманд
+        is_command_inline = True
         if '@' in trigger:
             await message.answer('Нельзя сохранять симовол @ в комманду')
+            return
         if message.sticker or message.video_note:
             await message.answer('Данный тип медиа не поддерживается')
             return
-        is_command_inline = True
     media = None
 
     if target_message.photo \
@@ -87,7 +88,7 @@ async def delete_command(message: Message):
 
 @dp.message_handler(commands='mycom', chat_type=ChatType.PRIVATE)
 async def my_commands(message: Message):
-    result = models.get_mycommands(created_by=message.from_user)
+    result = models.get_mycommands(created_by=message.from_user, to_chat=message.chat)
     mycom = ''
     for command in result:
         mycom += '/' + command.trigger + ' '

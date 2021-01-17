@@ -79,8 +79,8 @@ def save_command(trigger,  # функции возвращают 2 значен�
                                                 is_inline=is_inline)
 
     if created:  # проверка на лимиты
-        commands = Command.select().where(Command.created_by == db_user)
-        print(len(commands))
+        commands = Command.select().where((Command.created_by == db_user) & (Command.to_chat == db_chat))
+
         if is_inline:
             tarif = db_user.tarif[0]
         else:
@@ -135,9 +135,10 @@ def delete_command(trigger,
                 & (Command.trigger == trigger)).delete_instance()
 
 
-def get_mycommands(created_by: aiogram.types.User):
+def get_mycommands(created_by: aiogram.types.User, to_chat: aiogram.types.Chat):
     db_user, created = save_user(created_by)
-    query = Command.select().where(Command.created_by == db_user)
+    db_chat, created = save_chat(to_chat)
+    query = Command.select().where((Command.created_by == db_user) & (Command.to_chat == db_chat))
     result = [t for t in query]
     return result
 
