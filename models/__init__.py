@@ -79,7 +79,7 @@ def save_command(trigger,  # функции возвращают 2 значен�
                                                 is_inline=is_inline)
 
     if created:  # проверка на лимиты
-        commands = Command.select().where((Command.created_by == db_user) & (Command.to_chat == db_chat))
+        commands = Command.select().where(Command.to_chat == db_chat)
 
         if is_inline:
             tarif = db_user.tarif[0]
