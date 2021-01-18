@@ -69,6 +69,8 @@ async def on_trigger(message: Message):
                                          parse_mode=ParseMode.HTML)
     if command.media_type == 'video_note':
         await message.bot.send_video_note(chat_id=chat_id, video_note=command.media_file_id)
+    if command.media_type == 'sticker':
+        await message.bot.send_sticker(chat_id=chat_id, sticker=command.media_file_id)
     if command.media_type == 'no_media':
         await message.bot.send_message(chat_id=chat_id, text=caption, parse_mode=ParseMode.HTML)
 
@@ -149,7 +151,7 @@ def get_inline_query_result(commands: List[Command], target_user: User = None, t
                 item = InlineQueryResultPhoto(id=item_id, photo_url=command.media_file_id,
                                               thumb_url=command.media_file_id,
                                               caption=caption, parse_mode=ParseMode.HTML, title=command.trigger)
-            elif command.media_type == 'document' or command.media_type == 'audio':
+            elif command.media_type == 'document' or command.media_type == 'audio' or command.media_type == 'sticker':
                 item = InlineQueryResultDocument(id=item_id, document_url=command.media_file_id,
                                                  thumb_url=command.media_file_id,
                                                  title=command.trigger, mime_type='application/zip',
