@@ -1,5 +1,5 @@
 import models
-from aiogram.types import Message, ChatType
+from aiogram.types import Message, ChatType, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from auth import dp
 from utils.general import save_message_to_storage_channel
 from utils import logger
@@ -109,3 +109,27 @@ async def chat_commands(message: Message):
 @dp.message_handler(commands='get_id', chat_type=ChatType.GROUP)
 async def get_id(message: Message):
     await message.answer(text=message.chat.id)
+
+
+@dp.message_handler(commands='premium', chat_type=[ChatType.PRIVATE])
+async def premium(message: Message):
+    text = 'Вы можете купить премиум подписку по цене 50 руб. в месяц и снять ограничения для своего аккаунта \n' \
+           'или чата на время действия подпискаи. Премиум покапается отдельно для каждого чата в котором есть бот.'
+
+    keyboard = InlineKeyboardMarkup()
+    buy_for_chat_button = InlineKeyboardButton('Премиум для чата', callback_data='premium_chat')
+    but_for_account_button = InlineKeyboardButton('Премиум для аккаунта', callback_data='premium_account')
+    keyboard.add(but_for_account_button, buy_for_chat_button)
+    await message.answer(text, reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda query: query.data and query.data == 'premium_chat')
+async def premium_chat(callback_query: CallbackQuery):
+    # todo
+    await callback_query.answer()  # для того чтобы не было значка загрузки на кнопке
+
+
+@dp.callback_query_handler(lambda query: query.data and query.data == 'premium_account')
+async def premium_account(callback_query: CallbackQuery):
+    # todo
+    await callback_query.answer()
