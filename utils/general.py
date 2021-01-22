@@ -18,6 +18,7 @@ def get_full_name_link(user):
     return '<a href=\"tg://user?id=' + str(user_id) + '\">' + get_full_name(user) + '</a>'
 
 
+# Сохранение медиа в канал-архив
 async def save_message_to_storage_channel(target_message: Message) -> Message:
     channel_id = config.target_channel_id
 
