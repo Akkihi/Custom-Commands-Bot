@@ -1,5 +1,5 @@
 # CommandsBot
-Telegram-bot for custom commands
+Telegram-bot for custom commands @icmdbot
 
 # TODO
 * Status, system, updates and all bot alerts for users.
